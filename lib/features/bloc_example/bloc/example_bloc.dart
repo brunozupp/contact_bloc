@@ -12,8 +12,24 @@ class ExampleBloc extends Bloc<ExampleEvent,ExampleState> {
   ExampleBloc() : super(ExampleStateInitial()) {
 
     on<ExampleFindNameEvent>(_findNames);
+
+    on<ExampleRemoveNameEvent>(_removeName);
   }
 
+  FutureOr<void> _removeName(
+    ExampleRemoveNameEvent event,
+    Emitter<ExampleState> emit,
+  ) async {
+
+    if(state is ExampleStateData) {
+      final names = (state as ExampleStateData).names.toList();
+
+      // Vai manter na lista todos os caras que forem falso
+      names.retainWhere((name) => name != event.name);
+
+      emit(ExampleStateData(names: names));
+    }
+  }
 
   FutureOr<void> _findNames(
     ExampleFindNameEvent event, 
@@ -28,6 +44,8 @@ class ExampleBloc extends Bloc<ExampleEvent,ExampleState> {
       "C#", 
       "Java"
     ];
+
+    await Future.delayed(const Duration(seconds: 2));
 
     emit(ExampleStateData(names: names));
   }
