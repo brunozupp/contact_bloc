@@ -14,6 +14,25 @@ class ExampleBloc extends Bloc<ExampleEvent,ExampleState> {
     on<ExampleFindNameEvent>(_findNames);
 
     on<ExampleRemoveNameEvent>(_removeName);
+  
+    on<ExampleAddNameEvent>(_addName);
+  }
+
+  FutureOr<void> _addName(
+    ExampleAddNameEvent event,
+    Emitter<ExampleState> emit,
+  ) async {
+
+    final stateAux = state;
+
+    if(stateAux is ExampleStateData) {
+
+      final names = stateAux.names.toList();
+
+      names.add(event.name);
+
+      emit(ExampleStateData(names: names));
+    }
   }
 
   FutureOr<void> _removeName(

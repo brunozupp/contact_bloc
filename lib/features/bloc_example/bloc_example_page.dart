@@ -125,6 +125,79 @@ class BlocExamplePage extends StatelessWidget {
           ),
         ),
       ),
+      floatingActionButton: BlocSelector<ExampleBloc,ExampleState,bool>(
+        selector: (state) {
+          return state is ExampleStateData;
+        }, 
+        builder: (context, showButton) {
+          if(showButton) {
+            return FloatingActionButton(
+              child: const Icon(
+                Icons.add,
+              ),
+              onPressed: () async {
+
+                final formKey = GlobalKey<FormState>();
+                final nameEC = TextEditingController();
+
+                await showDialog<String?>(
+                  context: context, 
+                  builder: (_) {
+                    return AlertDialog(
+                      title: const Text("Digite um nome"),
+                      content: Form(
+                        key: formKey,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TextFormField(
+                              controller: nameEC,
+                              validator: (value) {
+                                if(value == null || value.isEmpty) {
+                                  return "Nome obrigatório";
+                                }
+
+                                return null;
+                              },
+                              decoration: const InputDecoration(
+                                labelText: "Nome",
+                              )
+                            ),
+
+                            const SizedBox(
+                              height: 10,
+                            ),
+
+                            ElevatedButton(
+                              onPressed: () {
+                                
+                                final formValid = formKey.currentState?.validate() ?? false;
+
+                                if(formValid) {
+                                  context.read<ExampleBloc>().add(
+                                    ExampleAddNameEvent(
+                                      name: nameEC.text,
+                                    ),
+                                  );
+
+                                  Navigator.of(context).pop();
+                                }
+                              }, 
+                              child: const Text("Enviar"),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                );
+              },
+            );
+          }
+
+          return const SizedBox.shrink();
+        }
+      ),
     );
   }
 }
