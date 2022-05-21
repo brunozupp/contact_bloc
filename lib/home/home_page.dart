@@ -11,16 +11,16 @@ class HomePage extends StatelessWidget {
         title: const Text('Home Page'),
       ),
       body: GridView.count(
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         crossAxisCount: 2,
-        children: [
+        children: const [
           _ButtonCard(
             label: "Example",
             route: "/bloc/example/",
           ),
           _ButtonCard(
             label: "Example Freezed",
-            route: "",
+            route: "/bloc/example/freezed/",
           ),
           _ButtonCard(
             label: "Contact",
