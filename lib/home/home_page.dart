@@ -23,8 +23,8 @@ class HomePage extends StatelessWidget {
             route: "/bloc/example/freezed/",
           ),
           _ButtonCard(
-            label: "Contact",
-            route: "",
+            label: "Contact Bloc",
+            route: "/contact/list/",
           ),
           _ButtonCard(
             label: "Contact Cubit",
