@@ -28,7 +28,7 @@ class HomePage extends StatelessWidget {
           ),
           _ButtonCard(
             label: "Contact Cubit",
-            route: "",
+            route: "/contact/cubit/list/",
           ),
         ],
       ),

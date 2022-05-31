@@ -1,79 +1,66 @@
-import 'package:contact_bloc/features/contacts/list/bloc/contact_list_bloc.dart';
+import 'package:contact_bloc/features/contacts_cubit/list/cubit/contact_list_cubit.dart';
 import 'package:contact_bloc/models/contact_model.dart';
 import 'package:contact_bloc/widgets/loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-    
-class ContactsListPage extends StatelessWidget {
 
-  const ContactsListPage({ Key? key }) : super(key: key);
-  
+class ContactListCubitPage extends StatelessWidget {
+  const ContactListCubitPage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Contatos'),
+        title: const Text('Contact Cubit List'),
       ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(
-          Icons.add,
-        ),
-        onPressed: () async {
-          await Navigator.of(context).pushNamed("/contact/register/");
-        
-          context.read<ContactListBloc>().add(
-            const ContactListEvent.findAll(),
-          );
-        }
-      ),
-      body: BlocListener<ContactListBloc,ContactListState>(
-        listenWhen: (previous, current) { // Adicionado essa condicional para não ficar executando o listener sem necessidade
-          return current.maybeWhen(
-            orElse: () => false,
-            error: (error) => true,
-            success: (message) => true,
-          );
+      body: RefreshIndicator(
+        onRefresh: () async {
+          context.read<ContactListCubit>().findAll();
         },
-        listener: (context, state) {
-          state.whenOrNull(
-            error: (error) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    error,
-                    style: const TextStyle(
-                      color: Colors.white,
+        child: BlocListener<ContactListCubit, ContactListCubitState>(
+          listenWhen: (previous,current) {
+            return current.maybeWhen(
+              error: (_) => true,
+              success: (_) => true,
+              orElse: () => false,
+            );
+          },
+          listener: (context, state) {
+            state.whenOrNull(
+              success: (message) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      message,
+                      style: const TextStyle(
+                        color: Colors.white,
+                      ),
                     ),
+                    backgroundColor: Colors.green,
                   ),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            },
-            success: (message) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    message,
-                    style: const TextStyle(
-                      color: Colors.white,
+                );
+              },
+              error: (message) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      message,
+                      style: const TextStyle(
+                        color: Colors.white,
+                      ),
                     ),
+                    backgroundColor: Colors.red,
                   ),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            }
-          );
-        },
-        child: RefreshIndicator(
-          onRefresh: () async => context.read<ContactListBloc>()
-              ..add(const ContactListEvent.findAll()),
+                );
+              }
+            );
+          },
           child: CustomScrollView(
             slivers: [
               SliverFillRemaining(
                 child: Column(
                   children: [
-
-                    Loader<ContactListBloc, ContactListState>(
+                    Loader<ContactListCubit, ContactListCubitState>(
                       selector: (state) {
                         return state.maybeWhen(
                           loading: () => true,
@@ -81,35 +68,25 @@ class ContactsListPage extends StatelessWidget {
                         );
                       },
                     ),
-
-                    BlocSelector<ContactListBloc,ContactListState,List<ContactModel>>(
+                    BlocSelector<ContactListCubit, ContactListCubitState,
+                        List<ContactModel>>(
                       selector: (state) {
                         return state.maybeWhen(
                           data: (contacts) => contacts,
                           orElse: () => [],
                         );
-                      }, 
+                      },
                       builder: (context, contacts) {
                         return ListView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: contacts.length,
                           itemBuilder: (context, index) {
-                            
                             final contact = contacts[index];
-                            
-                            return ListTile(
-                              onTap: () async {
-                                await Navigator.pushNamed(
-                                  context, 
-                                  '/contact/update/',
-                                  arguments: contact,
-                                );
 
-                                context.read<ContactListBloc>().add(
-                                  const ContactListEvent.findAll(),
-                                );
-                              },
+                            return ListTile(
+                              title: Text(contact.name),
+                              subtitle: Text(contact.email),
                               trailing: IconButton(
                                 onPressed: () async {
 
@@ -138,24 +115,17 @@ class ContactsListPage extends StatelessWidget {
                                   ) ?? false;
 
                                   if(confirm) {
-                                    context.read<ContactListBloc>()
-                                      .add(ContactListEvent.delete(contact));
+                                    context.read<ContactListCubit>().delete(contact);
                                   }
                                 }, 
-                                icon: Icon(
+                                icon: const Icon(
                                   Icons.delete,
                                 ),
                               ),
-                              title: Text(
-                                contact.name,
-                              ),
-                              subtitle: Text(
-                                contact.email,
-                              ),
                             );
-                          }
+                          },
                         );
-                      }
+                      },
                     ),
                   ],
                 ),
