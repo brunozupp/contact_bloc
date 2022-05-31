@@ -14,4 +14,8 @@ abstract class ContactListState with _$ContactListState {
   factory ContactListState.error({
     required String error,
   }) = _ContactListStateError;
+
+  factory ContactListState.success({
+    required String message,
+  }) = _ContactListStateSuccess;
 }

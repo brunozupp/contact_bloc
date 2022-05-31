@@ -18,8 +18,12 @@ class ContactsListPage extends StatelessWidget {
         child: const Icon(
           Icons.add,
         ),
-        onPressed: () {
-          Navigator.of(context).pushNamed("/contact/register/");
+        onPressed: () async {
+          await Navigator.of(context).pushNamed("/contact/register/");
+        
+          context.read<ContactListBloc>().add(
+            const ContactListEvent.findAll(),
+          );
         }
       ),
       body: BlocListener<ContactListBloc,ContactListState>(
@@ -27,6 +31,7 @@ class ContactsListPage extends StatelessWidget {
           return current.maybeWhen(
             orElse: () => false,
             error: (error) => true,
+            success: (message) => true,
           );
         },
         listener: (context, state) {
@@ -41,6 +46,19 @@ class ContactsListPage extends StatelessWidget {
                     ),
                   ),
                   backgroundColor: Colors.red,
+                ),
+              );
+            },
+            success: (message) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    message,
+                    style: const TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                  backgroundColor: Colors.green,
                 ),
               );
             }
@@ -74,15 +92,59 @@ class ContactsListPage extends StatelessWidget {
                       builder: (context, contacts) {
                         return ListView.builder(
                           shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
                           itemCount: contacts.length,
                           itemBuilder: (context, index) {
                             
                             final contact = contacts[index];
                             
                             return ListTile(
-                              onTap: () => Navigator.pushNamed(
-                                context, 
-                                '/contact/update/'
+                              onTap: () async {
+                                await Navigator.pushNamed(
+                                  context, 
+                                  '/contact/update/',
+                                  arguments: contact,
+                                );
+
+                                context.read<ContactListBloc>().add(
+                                  const ContactListEvent.findAll(),
+                                );
+                              },
+                              trailing: IconButton(
+                                onPressed: () async {
+
+                                  final confirm = await showDialog<bool?>(
+                                    context: context, 
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        content: Text("Tem certeza que deseja deletar?"),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => Navigator.of(context).pop(false), 
+                                            child: Text("Voltar"),
+                                          ),
+                                          TextButton(
+                                            onPressed: () => Navigator.of(context).pop(true), 
+                                            child: Text(
+                                              "Deletar",
+                                              style: TextStyle(
+                                                color: Colors.red,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    }
+                                  ) ?? false;
+
+                                  if(confirm) {
+                                    context.read<ContactListBloc>()
+                                      .add(ContactListEvent.delete(contact));
+                                  }
+                                }, 
+                                icon: Icon(
+                                  Icons.delete,
+                                ),
                               ),
                               title: Text(
                                 contact.name,
