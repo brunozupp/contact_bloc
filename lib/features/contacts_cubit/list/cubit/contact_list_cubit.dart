@@ -24,9 +24,7 @@ class ContactListCubit extends Cubit<ContactListCubitState> {
       emit(ContactListCubitState.loading());
       
       final contacts = await _contactsRepository.findAll();
-      
-      await Future.delayed(const Duration(seconds: 1));
-      
+            
       emit(ContactListCubitState.data(contacts: contacts));
     } on Exception catch (e,s) {
       log("Erro ao buscar contatos", error: e, stackTrace: s);
@@ -42,8 +40,6 @@ class ContactListCubit extends Cubit<ContactListCubitState> {
 
       final contacts = await _contactsRepository.findAll();
       
-      await Future.delayed(const Duration(seconds: 1));
-
       emit(ContactListCubitState.success(message: "Contato deletado com sucesso"));
       
       emit(ContactListCubitState.data(contacts: contacts));
